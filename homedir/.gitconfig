@@ -1,0 +1,163 @@
+[user]
+  name = GITHUBFULLNAME
+  email = GITHUBEMAIL
+
+[github]
+  # https://github.com/blog/180-local-github-config
+  user = GITHUBUSER
+
+[color]
+  # ui = true is a superset of all the more specific color options
+  # as documented at http://book.git-scm.com/5_customizing_git.html
+  ui = auto
+
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+
+[advice]
+  statusHints = false
+
+[core]
+  excludesfile = ~/.gitignore
+  quotepath = false
+  autocrlf = input
+  safecrlf = warn
+  editor = "vim -f"
+  # make `git rebase` safer on macOS
+  # more info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
+  trustctime = false
+
+[alias]
+  cl = clone --recursive
+  co = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+  com = checkout master
+
+  # show the diff between the latest commit and the current state, ignoring whitespace
+  d = !"git diff-index --quiet HEAD --; git --no-pager diff --patch-with-stat -w"
+  # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+  di = !"d() { git --no-pager diff --patch-with-stat HEAD~$1; }; git --no-pager diff-index --quiet HEAD --; d"
+
+  s = status -s -u
+
+  ca = !git add -A && git commit -av
+  c = commit -v
+  ci = commit -v
+  cam = commit -a -m
+
+  repush = !"git commit --amend --reuse-message=HEAD && git push --force-with-lease"
+  # remove the old tag with this name and tag the latest commit with it.
+  retag = "!r() { git tag -d $1 && git push origin :refs/tags/$1 && git tag $1; }; r"
+
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  # view abbreviated SHA, description, and history graph of the latest 20 commits
+  l = log --pretty=oneline -n 20 --graph --abbrev-commit
+
+  upm = !git fetch upstream && git merge upstream/master
+  # new standard to replace the deprecated git-up gem package:
+  up = pull --rebase --autostash
+
+  rb = !git fetch origin master:master && git rebase master
+  rh = !git fetch origin && git reset --hard origin/master
+  scrub = !git reset --hard && git clean -fd
+  undo = reset --soft HEAD^
+
+  # remove branches that have already been merged with master (a.k.a. ‘delete merged’)
+  dm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+
+  # show verbose output about tags, branches or remotes
+  tags = tag -l
+  branches = branch -a
+  remotes = remote -v
+
+  # find branches containing commit
+  fb = "!f() { git branch -a --contains $1; }; f"
+  # find tags containing commit
+  ft = "!f() { git describe --always --contains $1; }; f"
+  # find commits by source code
+  fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+  # find commits by commit message
+  fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+  who = shortlog -s --
+  shorten = "!sh -c 'curl -i http://git.io -F url=$1' -"
+
+[apply]
+  whitespace = nowarn
+
+[rerere]
+  # enable the recording of resolved conflicts, so that identical chunks can be resolved automatically later on
+  enabled = 1
+
+[diff]
+  tool = meld
+  # detect copies as well as renames
+  renames = copies
+
+[difftool]
+  prompt = false
+
+[difftool "meld"]
+  trustExitCode = true
+  cmd = open -W -a Meld --args \"$LOCAL\" \"$PWD/$REMOTE\"
+
+[init]
+  templatedir = ~/.dotfiles/.git_template
+
+[merge]
+  tool = meld
+  # always show a diffstat at the end of a merge
+  stat = true
+  conflictstyle = diff3
+
+[mergetool]
+  prompt = false
+  keepBackup = false
+
+[mergetool "meld"]
+  trustExitCode = true
+  cmd = open -W -a Meld --args --auto-merge \"$PWD/$LOCAL\" \"$PWD/$BASE\" \"$PWD/$REMOTE\" --output \"$PWD/$MERGED\"
+
+[pager]
+  diff = diff-so-fancy | less --tabs=1,5 -RFX
+  show = diff-so-fancy | less --tabs=1,5 -RFX
+
+[credential]
+  # cache creds (git help credential-cache)
+  helper = cache
+
+[filter "tabspace"]
+  clean = expand -t 4
+
+[push]
+  # https://git-scm.com/docs/git-config#Documentation/git-config.txt-pushdefault
+  default = simple
+  followTags = true
+
+[filter "media"]
+  required = true
+  clean = git media clean %f
+  smudge = git media smudge %f
+
+[filter "lfs"]
+  clean = git-lfs clean %f
+  smudge = git-lfs smudge %f
+  required = true
+
+[url "https://github.com/"]
+  insteadOf = github:
+  insteadOf = gh:
+
+[url "git@github.com:"]
+  pushInsteadOf = github:
+  pushInsteadOf = gh:

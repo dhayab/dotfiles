@@ -1,0 +1,30 @@
+{
+  "name": "dotfiles",
+  "version": "0.0.1",
+  "description": "dotfiles for macos (forked from @atomantic dotfiles repository)",
+  "main": "index.js",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhayab/dotfiles.git"
+  },
+  "keywords": [
+    "dotfiles",
+    "osx",
+    "macos",
+    "automation",
+    "setup",
+    "developer",
+    "iterm",
+    "commandline",
+    "bootstrap"
+  ],
+  "author": "Dhaya",
+  "license": "ISC",
+  "homepage": "https://github.com/dhayab/dotfiles#readme",
+  "dependencies": {
+    "async.series": "0.5.2",
+    "inquirer": "6.2.2",
+    "node-emoji": "1.10.0"
+  }
+}
