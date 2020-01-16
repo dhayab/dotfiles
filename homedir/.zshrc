@@ -100,7 +100,8 @@ alias ls='ls -G -h -p '
 alias ll='ls -l -G -h -p '
 
 # Lock the screen (when going AFK)
-alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+# alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+alias afk="open -a ScreenSaverEngine.app"
 
 # Flush the DNS on Mac
 alias dnsflush='dscacheutil -flushcache'
@@ -112,3 +113,9 @@ alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
+
+# apps aliases
+alias typora="open -a typora"
+
+# brew: gnu-sed + grep
+export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$PATH
