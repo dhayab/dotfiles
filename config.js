@@ -74,8 +74,16 @@ module.exports = {
     'quicklook-json',
     'suspicious-package',
   ],
-  gem: [
+  gem: [],
+  mas: [
+    // 1Password
+    '1333542190',
+    // Deliveries.app
+    '290986013',
+    // Fantastical
+    '975937182',
+    // SimplyJSON
+    '1495193038',
   ],
-  npm: [
-  ]
+  npm: [],
 };
