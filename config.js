@@ -1,5 +1,7 @@
 module.exports = {
   brew: [
+    // terminal bandwidth monitoring
+    'bandwhich',
     // alternative to `cat`: https://github.com/sharkdp/bat
     'bat',
     // Install GNU core utilities (those that come with macOS are outdated)
@@ -10,6 +12,7 @@ module.exports = {
     'findutils',
     'readline', // ensure gawk gets good readline
     'gawk',
+    'git-delta',
     'gnupg',
     // Install GNU `sed`, overwriting the built-in `sed`
     // so we can do "sed -i 's/foo/bar/' file" instead of "sed -i '' 's/foo/bar/' file"
@@ -22,6 +25,7 @@ module.exports = {
     'httpie',
     // jq is a sort of JSON grep
     'jq',
+    'k9s',
     'kubernetes-cli',
     // Mac App Store CLI: https://github.com/mas-cli/mas
     'mas',
@@ -37,21 +41,28 @@ module.exports = {
     'wget --enable-iri',
   ],
   cask: [
-    '1password',
+    // '1password', // using mas version instead
     'aerial',
+    'appcleaner',
+    'cleanshot',
     'clipy',
+    'coderunner',
     'docker',
-    'fantastical',
-    'franz',
-    'google-chrome',
+    // 'fantastical', // using mas version instead
+    'finicky',
+    'iina',
+    'insomnia',
     'istat-menus',
     'iterm2',
+    'logitech-options',
     'meld',
-    'microsoft-remote-desktop-beta',
+    'monitorcontrol',
     'moom',
+    'plexamp',
+    'slack',
     'the-unarchiver',
-    'tunnelblick',
     'typora',
+    'viscosity',
     'visual-studio-code',
     'xquartz',
     // Quick Look plugins: https://github.com/sindresorhus/quick-look-plugins
@@ -66,8 +77,5 @@ module.exports = {
   gem: [
   ],
   npm: [
-    'npm-check-updates',
-    'ts-node',
-    'typescript',
   ]
 };

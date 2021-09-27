@@ -114,8 +114,23 @@ alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
+# Kube aliases
+"kube-ingresses"() { # List unique ingresses
+  kubectl get ingress --all-namespaces -o json | jq -r '.items[].spec.rules[].host' | sort -u
+}
+"kube-ingress"() { # List all ingresses for a specific domain name
+  kubectl get ingress --all-namespaces -o json | jq -r '.items[] | . as $item | .spec.rules[] | select(.host == "'"$([[ -n $1 ]] && echo $1 || echo staging)"'.oodev.io") | .host + .http.paths[].path + " (" + $item.metadata.namespace + "/" + $item.metadata.name + ")"' | sort
+}
+"kube-status"() {
+  kubectl get pods --all-namespaces -o json | jq -r '.items[] | select(.status.phase != "Succeeded" and select(.status.containerStatuses[0].ready == false)) | .metadata.namespace + "/" + .metadata.name'
+}
+
 # apps aliases
 alias typora="open -a typora"
+alias kube="kubectl"
 
 # brew: gnu-sed + grep
 export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$PATH
+
+# use vivaldi binary for karma
+export CHROME_BIN=/Applications/Vivaldi.app/Contents/MacOS/Vivaldi

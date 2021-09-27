@@ -40,7 +40,8 @@
 
 [alias]
   cl = clone --recursive
-  co = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+  # co = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+  co = checkout
   com = checkout master
 
   # show the diff between the latest commit and the current state, ignoring whitespace
@@ -129,7 +130,8 @@
   cmd = open -W -a Meld --args --auto-merge \"$PWD/$LOCAL\" \"$PWD/$BASE\" \"$PWD/$REMOTE\" --output \"$PWD/$MERGED\"
 
 [pager]
-  diff = diff-so-fancy | less --tabs=1,5 -RFX
+  # diff = diff-so-fancy | less --tabs=1,5 -RFX
+  diff = delta --dark
   show = diff-so-fancy | less --tabs=1,5 -RFX
 
 [credential]
