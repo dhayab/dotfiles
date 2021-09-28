@@ -1,8 +1,7 @@
-export EDITOR="vim"
-bindkey -v
-
-# Don't clear the screen after quitting a manual page.
-export MANPAGER='less -X'
+##############################################################################
+#Import the shell-agnostic (Bash or Zsh) environment config
+##############################################################################
+source ~/.profile
 
 ##############################################################################
 # History Configuration

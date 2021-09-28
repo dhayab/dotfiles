@@ -5,7 +5,7 @@ export DEFAULT_USER=LOGNAME
 
 export ZSH_THEME="powerlevel9k/powerlevel9k"
 POWERLEVEL9K_MODE='nerdfont-complete'
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(status context dir node_version vcs)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(status context dir nvm vcs)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(command_execution_time root_indicator)
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
 # POWERLEVEL9K_PROMPT_ON_NEWLINE=true
@@ -23,8 +23,8 @@ POWERLEVEL9K_DIR_HOME_SUBFOLDER_FOREGROUND=white
 POWERLEVEL9K_DIR_HOME_SUBFOLDER_BACKGROUND=steelblue
 POWERLEVEL9K_DIR_PATH_HIGHLIGHT_BOLD=true
 POWERLEVEL9K_SHORTEN_DIR_LENGTH=2
-POWERLEVEL9K_NODE_VERSION_FOREGROUND=black
-POWERLEVEL9K_NODE_VERSION_BACKGROUND=green
+POWERLEVEL9K_NVM_FOREGROUND=black
+POWERLEVEL9K_NVM_BACKGROUND=green
 POWERLEVEL9K_VCS_CLEAN_FOREGROUND=green
 POWERLEVEL9K_VCS_CLEAN_BACKGROUND=black
 POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=yellow
@@ -53,17 +53,14 @@ plugins=(colorize compleat cp dirpersist docker git httpie kubectl npm)
 
 source $ZSH/oh-my-zsh.sh
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-export NVM_DIR=$HOME/.nvm
 source /usr/local/opt/nvm/nvm.sh
 
 autoload -U add-zsh-hook
 load-nvmrc() {
   if [[ -f .nvmrc && -r .nvmrc ]]; then
     nvm use &> /dev/null
-  elif [[ $(nvm version) != $(nvm version default)  ]]; then
-    nvm use default &> /dev/null
+  else
+    nvm use stable
   fi
 }
 add-zsh-hook chpwd load-nvmrc
@@ -76,61 +73,3 @@ function short_title {
     title $(basename `pwd`)
 }
 precmd_functions+=short_title
-
-# Use Mac OS Preview to open a man page in a more handsome format
-function manp() {
-  man -t $1 | open -f -a /Applications/Preview.app
-}
-
-man() {
-  env \
-    LESS_TERMCAP_md=$'\e[1;36m' \
-    LESS_TERMCAP_me=$'\e[0m' \
-    LESS_TERMCAP_se=$'\e[0m' \
-    LESS_TERMCAP_so=$'\e[1;40;92m' \
-    LESS_TERMCAP_ue=$'\e[0m' \
-    LESS_TERMCAP_us=$'\e[1;32m' \
-      man "$@"
-}
-
-# Enable aliases to be sudo’ed
-alias sudo='sudo '
-
-alias ls='ls -G -h -p '
-alias ll='ls -l -G -h -p '
-
-# Lock the screen (when going AFK)
-# alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
-alias afk="open -a ScreenSaverEngine.app"
-
-# Flush the DNS on Mac
-alias dnsflush='dscacheutil -flushcache'
-
-# IP addresses
-alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
-alias iplocal="ipconfig getifaddr en0"
-alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
-
-# Print each PATH entry on a separate line
-alias path='echo -e ${PATH//:/\\n}'
-
-# Kube aliases
-"kube-ingresses"() { # List unique ingresses
-  kubectl get ingress --all-namespaces -o json | jq -r '.items[].spec.rules[].host' | sort -u
-}
-"kube-ingress"() { # List all ingresses for a specific domain name
-  kubectl get ingress --all-namespaces -o json | jq -r '.items[] | . as $item | .spec.rules[] | select(.host == "'"$([[ -n $1 ]] && echo $1 || echo staging)"'.oodev.io") | .host + .http.paths[].path + " (" + $item.metadata.namespace + "/" + $item.metadata.name + ")"' | sort
-}
-"kube-status"() {
-  kubectl get pods --all-namespaces -o json | jq -r '.items[] | select(.status.phase != "Succeeded" and select(.status.containerStatuses[0].ready == false)) | .metadata.namespace + "/" + .metadata.name'
-}
-
-# apps aliases
-alias typora="open -a typora"
-alias kube="kubectl"
-
-# brew: gnu-sed + grep
-export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$PATH
-
-# use vivaldi binary for karma
-export CHROME_BIN=/Applications/Vivaldi.app/Contents/MacOS/Vivaldi

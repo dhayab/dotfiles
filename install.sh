@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#TODO: update after macOS Catalina, default mac shell: bash is changing to zsh
+
 ###########################
 # This script installs the dotfiles and runs all other system configuration scripts
 # @author Adam Eivy
@@ -20,7 +22,7 @@ if [ $? -ne 0 ]; then
   # Keep-alive: update existing sudo time stamp until the script has finished
   while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
-  echo "Do you want me to setup this machine to allow you to run sudo without a password?\nPlease read here to see what I am doing:\nhttp://wiki.summercode.com/sudo_without_a_password_in_mac_os_x \n"
+  bot "Do you want me to setup this machine to allow you to run sudo without a password?\nPlease read here to see what I am doing:\nhttp://wiki.summercode.com/sudo_without_a_password_in_mac_os_x \n"
 
   read -r -p "Make sudo passwordless? [y|N] " response
 
@@ -93,12 +95,14 @@ if [[ $? = 0 ]]; then
   sed -i "s/GITHUBFULLNAME/$firstname $lastname/" ./homedir/.gitconfig > /dev/null 2>&1 | true
   if [[ ${PIPESTATUS[0]} != 0 ]]; then
     echo
+    running "looks like you are using MacOS sed rather than gnu-sed, accommodating"
     sed -i '' "s/GITHUBFULLNAME/$firstname $lastname/" ./homedir/.gitconfig
     sed -i '' 's/GITHUBEMAIL/'$email'/' ./homedir/.gitconfig
     sed -i '' 's/GITHUBUSER/'$githubuser'/' ./homedir/.gitconfig
     ok
   else
     echo
+    bot "looks like you are already using gnu-sed. woot!"
     sed -i 's/GITHUBEMAIL/'$email'/' ./homedir/.gitconfig
     sed -i 's/GITHUBUSER/'$githubuser'/' ./homedir/.gitconfig
   fi
@@ -124,39 +128,58 @@ fi
 # Wallpaper
 # ###########################################################
 
-MD5_NEWWP=$(md5 img/wallpaper.jpg | awk '{print $4}')
-MD5_OLDWP=$(md5 /System/Library/CoreServices/DefaultDesktop.jpg | awk '{print $4}')
-if [[ "$MD5_NEWWP" != "$MD5_OLDWP" ]]; then
-  read -r -p "Do you want to use the project's custom desktop wallpaper? [y|N] " response
-  if [[ $response =~ (yes|y|Y) ]]; then
-    running "Set a custom wallpaper image"
-    # rm -rf ~/Library/Application Support/Dock/desktoppicture.db
-    bot "I will backup system wallpapers in ~/.dotfiles/img/"
-    sudo cp /System/Library/CoreServices/DefaultDesktop.jpg img/DefaultDesktop.jpg > /dev/null 2>&1
-    sudo cp /Library/Desktop\ Pictures/El\ Capitan.jpg img/El\ Capitan.jpg > /dev/null 2>&1
-    sudo cp /Library/Desktop\ Pictures/Sierra.jpg img/Sierra.jpg > /dev/null 2>&1
-    sudo cp /Library/Desktop\ Pictures/Sierra\ 2.jpg img/Sierra\ 2.jpg > /dev/null 2>&1
-    sudo rm -f /System/Library/CoreServices/DefaultDesktop.jpg > /dev/null 2>&1
-    sudo rm -f /Library/Desktop\ Pictures/El\ Capitan.jpg > /dev/null 2>&1
-    sudo rm -f /Library/Desktop\ Pictures/Sierra.jpg > /dev/null 2>&1
-    sudo rm -f /Library/Desktop\ Pictures/Sierra\ 2.jpg > /dev/null 2>&1
-    sudo cp ./img/wallpaper.jpg /System/Library/CoreServices/DefaultDesktop.jpg;
-    sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/Sierra.jpg;
-    sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/Sierra\ 2.jpg;
-    sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/El\ Capitan.jpg;ok
-  else
-    ok "skipped"
-  fi
-fi
+# FIXME: Not working with HEIC default desktop background
+# MD5_NEWWP=$(md5 img/wallpaper.jpg | awk '{print $4}')
+# MD5_OLDWP=$(md5 /System/Library/CoreServices/DefaultDesktop.jpg | awk '{print $4}')
+# if [[ "$MD5_NEWWP" != "$MD5_OLDWP" ]]; then
+#   read -r -p "Do you want to use the project's custom desktop wallpaper? [y|N] " response
+#   if [[ $response =~ (yes|y|Y) ]]; then
+#     running "Set a custom wallpaper image"
+#     # rm -rf ~/Library/Application Support/Dock/desktoppicture.db
+#     bot "I will backup system wallpapers in ~/.dotfiles/img/"
+#     sudo cp /System/Library/CoreServices/DefaultDesktop.jpg img/DefaultDesktop.jpg > /dev/null 2>&1
+#     sudo cp /Library/Desktop\ Pictures/El\ Capitan.jpg img/El\ Capitan.jpg > /dev/null 2>&1
+#     sudo cp /Library/Desktop\ Pictures/Sierra.jpg img/Sierra.jpg > /dev/null 2>&1
+#     sudo cp /Library/Desktop\ Pictures/Sierra\ 2.jpg img/Sierra\ 2.jpg > /dev/null 2>&1
+#     sudo rm -f /System/Library/CoreServices/DefaultDesktop.jpg > /dev/null 2>&1
+#     sudo rm -f /Library/Desktop\ Pictures/El\ Capitan.jpg > /dev/null 2>&1
+#     sudo rm -f /Library/Desktop\ Pictures/Sierra.jpg > /dev/null 2>&1
+#     sudo rm -f /Library/Desktop\ Pictures/Sierra\ 2.jpg > /dev/null 2>&1
+#     sudo cp ./img/wallpaper.jpg /System/Library/CoreServices/DefaultDesktop.jpg;
+#     sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/Sierra.jpg;
+#     sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/Sierra\ 2.jpg;
+#     sudo cp ./img/wallpaper.jpg /Library/Desktop\ Pictures/El\ Capitan.jpg;ok
+#   else
+#     ok "skipped"
+#   fi
+# fi
 
 # ###########################################################
 # Install non-brew various tools (PRE-BREW Installs)
 # ###########################################################
 
-bot "Ensuring build/install tools are available"
-xcode-select --install 2>&1 > /dev/null
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer 2>&1 > /dev/null
-sudo xcodebuild -license accept 2>&1 > /dev/null
+bot "ensuring build/install tools are available"
+if ! xcode-select --print-path &> /dev/null; then
+
+    # Prompt user to install the XCode Command Line Tools
+    xcode-select --install &> /dev/null
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    # Wait until the XCode Command Line Tools are installed
+    until xcode-select --print-path &> /dev/null; do
+        sleep 5
+    done
+
+    print_result $? ' XCode Command Line Tools Installed'
+
+    # Prompt user to agree to the terms of the Xcode license
+    # https://github.com/alrra/dotfiles/issues/10
+
+    sudo xcodebuild -license
+    print_result $? 'Agree with the XCode Command Line Tools licence'
+
+fi
 
 # ###########################################################
 # Install Homebrew (CLI Packages)
@@ -166,15 +189,16 @@ running "checking homebrew..."
 brew_bin=$(which brew) 2>&1 > /dev/null
 if [[ $? != 0 ]]; then
   action "installing homebrew"
-  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   if [[ $? != 0 ]]; then
     error "unable to install homebrew, script $0 abort!"
     exit 2
   fi
+  brew analytics off
 else
   ok
   bot "Homebrew"
-  read -r -p "Run brew update && upgrade? [y|N] " response
+  read -r -p "run brew update && upgrade? [y|N] " response
   if [[ $response =~ (y|yes|Y) ]]; then
     action "updating homebrew..."
     brew update
@@ -187,30 +211,24 @@ else
   fi
 fi
 
-# ###########################################################
-# Install brew cask (UI Packages)
-# ###########################################################
-
-running "checking brew-cask install"
-output=$(brew tap | grep cask)
-if [[ $? != 0 ]]; then
-  action "installing brew-cask"
-  brew tap homebrew/cask
-  brew tap homebrew/cask-versions > /dev/null 2>&1
-fi
-ok
+# Just to avoid a potential bug
+mkdir -p ~/Library/Caches/Homebrew/Formula
+brew doctor
 
 # skip those GUI clients, git command-line all the way
 require_brew git
 # update zsh to latest
 require_brew zsh
-# update ruby to latest / use versions of packages installed with homebrew
+# update ruby to latest
+# use versions of packages installed with homebrew
 RUBY_CONFIGURE_OPTS="--with-openssl-dir=`brew --prefix openssl` --with-readline-dir=`brew --prefix readline` --with-libyaml-dir=`brew --prefix libyaml`"
 require_brew ruby
 # set zsh as the user login shell
 CURRENTSHELL=$(dscl . -read /Users/$USER UserShell | awk '{print $2}')
 if [[ "$CURRENTSHELL" != "/usr/local/bin/zsh" ]]; then
-  bot "Setting newer homebrew zsh (/usr/local/bin/zsh) as your shell (password required)"
+  bot "setting newer homebrew zsh (/usr/local/bin/zsh) as your shell (password required)"
+  # sudo bash -c 'echo "/usr/local/bin/zsh" >> /etc/shells'
+  # chsh -s /usr/local/bin/zsh
   sudo dscl . -change /Users/$USER UserShell $SHELL /usr/local/bin/zsh > /dev/null 2>&1
   ok
 fi
@@ -220,9 +238,9 @@ if [[ ! -d "./oh-my-zsh/custom/themes/powerlevel9k" ]]; then
 fi
 
 bot "Dotfiles Setup"
-read -r -p "Symlink ./homedir/* files in ~/ (these are the dotfiles)? [y|N] " response
+read -r -p "symlink ./homedir/* files in ~/ (these are the dotfiles)? [y|N] " response
 if [[ $response =~ (y|yes|Y) ]]; then
-  bot "Creating symlinks for project dotfiles..."
+  bot "creating symlinks for project dotfiles..."
   pushd homedir > /dev/null 2>&1
   now=$(date +"%Y.%m.%d.%H.%M.%S")
 
@@ -251,6 +269,8 @@ bot "VIM Setup"
 read -r -p "Do you want to install vim plugins now? [y|N] " response
 if [[ $response =~ (y|yes|Y) ]];then
   bot "Installing vim plugins"
+  # cmake is required to compile vim bundle YouCompleteMe
+  # require_brew cmake
   vim +PluginInstall +qall > /dev/null 2>&1
   ok
 else
@@ -259,21 +279,33 @@ fi
 
 read -r -p "Install fonts? [y|N] " response
 if [[ $response =~ (y|yes|Y) ]];then
-  bot "Installing fonts"
+  bot "installing fonts"
+  # need fontconfig to install/build fonts
+  require_brew fontconfig
+  # ./fonts/install.sh
   brew tap homebrew/cask-fonts
+  require_brew svn # required for some fonts
+  require_cask font-hack
   require_cask font-hack-nerd-font
+  require_cask font-inconsolata-dz-for-powerline
+  require_cask font-inconsolata-g-for-powerline
   require_cask font-inconsolata-for-powerline
+  require_cask font-source-code-pro
   ok
 fi
+
+
+# if [[ -d "/Library/Ruby/Gems/2.0.0" ]]; then
+#   running "Fixing Ruby Gems Directory Permissions"
+#   sudo chown -R $(whoami) /Library/Ruby/Gems/2.0.0
+#   ok
+# fi
 
 # node version manager
 require_brew nvm
 
 # nvm
-require_nvm --lts
-
-# always pin versions (no surprises, consistent dev/build machines)
-npm config set save-exact true
+require_nvm stable
 
 #####################################
 # Now we can switch to node.js mode
@@ -282,17 +314,17 @@ npm config set save-exact true
 # JSON files and inquirer prompts
 #####################################
 
-bot "Installing npm tools needed to run this project..."
+bot "installing npm tools needed to run this project..."
 npm install
 ok
 
-bot "Installing packages from config.js..."
+bot "installing packages from config.js..."
 node index.js
 ok
 
 running "cleanup homebrew"
-brew cleanup > /dev/null 2>&1
-rm -f -r ~/Library/Caches/Homebrew/* > /dev/null 2>&1
+brew cleanup --force > /dev/null 2>&1
+rm -f -r /Library/Caches/Homebrew/* > /dev/null 2>&1
 ok
 
 bot "OS Configuration"
@@ -309,7 +341,7 @@ bot "Configuring General System UI/UX..."
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
-running "Closing any system preferences to prevent issues with automated changes"
+running "closing any system preferences to prevent issues with automated changes"
 osascript -e 'tell application "System Preferences" to quit'
 ok
 
@@ -327,7 +359,7 @@ ok
 sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 
 # Enable firewall stealth mode (no response to ICMP / ping requests)
-# Source: https://support.apple.com/kb/PH18642
+# Source: https://support.apple.com/guide/mac-help/use-stealth-mode-to-keep-your-mac-more-secure-mh17133/mac
 #sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 
@@ -365,8 +397,11 @@ sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 # Disable remote login
 # sudo systemsetup -setremotelogin off
 
-running "Disable wake-on LAN"
-sudo systemsetup -setwakeonnetworkaccess off > /dev/null;ok
+# Disable wake-on modem
+# sudo systemsetup -setwakeonmodem off
+
+# Disable wake-on LAN
+sudo systemsetup -setwakeonnetworkaccess off
 
 # Disable file-sharing via AFP or SMB
 # sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.AppleFileServer.plist
@@ -408,19 +443,26 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -boo
 #sudo perl -p -i -e 's|filesz:2M|filesz:10M|g' /private/etc/security/audit_control
 #sudo perl -p -i -e 's|expire-after:10M|expire-after: 30d |g' /private/etc/security/audit_control
 
+# Disable the “Are you sure you want to open this application?” dialog
+# defaults write com.apple.LaunchServices LSQuarantine -bool false
+
 ###############################################################################
 # SSD-specific tweaks                                                         #
 ###############################################################################
 
+# disablelocal is no longer used, check man tmutil for more info
+# running "Disable local Time Machine snapshots"
+# sudo tmutil disablelocal;ok
+
 # running "Disable hibernation (speeds up entering sleep mode)"
 # sudo pmset -a hibernatemode 0;ok
 
-running "Remove the sleep image file to save disk space"
-sudo rm -rf /Private/var/vm/sleepimage;ok
-running "Create a zero-byte file instead"
-sudo touch /Private/var/vm/sleepimage;ok
-running "... and make sure it can’t be rewritten"
-sudo chflags uchg /Private/var/vm/sleepimage;ok
+# running "Remove the sleep image file to save disk space"
+# sudo rm -rf /Private/var/vm/sleepimage;ok
+# running "Create a zero-byte file instead"
+# sudo touch /Private/var/vm/sleepimage;ok
+# running "…and make sure it can’t be rewritten"
+# sudo chflags uchg /Private/var/vm/sleepimage;ok
 
 #running "Disable the sudden motion sensor as it’s not useful for SSDs"
 # sudo pmset -a sms 0;ok
@@ -428,6 +470,45 @@ sudo chflags uchg /Private/var/vm/sleepimage;ok
 ################################################
 # Optional / Experimental                      #
 ################################################
+
+# running "Set computer name (as done via System Preferences → Sharing)"
+# sudo scutil --set ComputerName "antic"
+# sudo scutil --set HostName "antic"
+# sudo scutil --set LocalHostName "antic"
+# sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "antic"
+
+#setting up the computer label & name
+# read -p "What is this machine's label (Example: Paul's MacBook Pro ) ? " mac_os_label
+# if [[ -z "$mac_os_label" ]]; then
+#   echo "ERROR: Invalid MacOS label."
+#   exit 1
+# fi
+
+# read -p "What is this machine's name (Example: paul-macbook-pro ) ? " mac_os_name
+# if [[ -z "$mac_os_name" ]]; then
+#   echo "ERROR: Invalid MacOS name."
+#   exit 1
+# fi
+
+# echo "Setting system Label and Name..."
+# sudo scutil --set ComputerName "$mac_os_label"
+# sudo scutil --set HostName "$mac_os_name"
+# sudo scutil --set LocalHostName "$mac_os_name"
+# sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$mac_os_name"
+
+# running "Disable smooth scrolling"
+# (Uncomment if you’re on an older Mac that messes up the animation)
+# defaults write NSGlobalDomain NSScrollAnimationEnabled -bool false;ok
+
+# running "Disable Resume system-wide"
+# defaults write NSGlobalDomain NSQuitAlwaysKeepsWindows -bool false;ok
+# TODO: might want to enable this again and set specific apps that this works great for
+# e.g. defaults write com.microsoft.word NSQuitAlwaysKeepsWindows -bool true
+
+# running "Fix for the ancient UTF-8 bug in QuickLook (http://mths.be/bbo)""
+# # Commented out, as this is known to cause problems in various Adobe apps :(
+# # See https://github.com/mathiasbynens/dotfiles/issues/237
+# echo "0x08000100:0" > ~/.CFUserTextEncoding;ok
 
 running "Stop iTunes from responding to the keyboard media keys"
 launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null;ok
@@ -468,7 +549,7 @@ bot "Standard System Changes"
 # running "always boot in verbose mode (not MacOS GUI mode)"
 # sudo nvram boot-args="-v";ok
 
-running "Allow 'locate' command"
+running "allow 'locate' command"
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist > /dev/null 2>&1;ok
 
 running "Set standby delay to 24 hours (default is 1 hour)"
@@ -524,8 +605,9 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true;ok
 running "Disable the “Are you sure you want to open this application?” dialog"
 defaults write com.apple.LaunchServices LSQuarantine -bool false;ok
 
-running "Remove duplicates in the “Open With” menu (also see 'lscleanup' alias)"
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user;ok
+# https://github.com/atomantic/dotfiles/issues/30#issuecomment-514589462
+#running "Remove duplicates in the “Open With” menu (also see 'lscleanup' alias)"
+#/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user;ok
 
 running "Display ASCII control characters using caret notation in standard text views"
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -574,7 +656,7 @@ running "Trackpad: enable three fingers drag"
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true;ok
 
 running "Trackpad: disable two fingers double tap gesture"
-TrackpadTwoFingerDoubleTapGesture -bool false;ok
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerDoubleTapGesture -bool false;ok
 
 # running "Trackpad: map bottom right corner to right-click"
 # defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
@@ -644,8 +726,8 @@ sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutio
 bot "Finder Configs"
 ###############################################################################
 
-running "Keep folders on top when sorting by name (Sierra only)"
-defaults write com.apple.finder _FXSortFoldersFirst -bool true;ok
+running "Keep folders on top when sorting by name (version 10.12 and later)"
+defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
 # running "Allow quitting via ⌘ + Q; doing so will also hide desktop icons"
 # defaults write com.apple.finder QuitMenuItem -bool true;ok
@@ -672,8 +754,8 @@ running "Enable snap-to-grid and set grid size for icons on the desktop"
 running "Show status bar"
 defaults write com.apple.finder ShowStatusBar -bool true;ok
 
-# running "Show path bar"
-# defaults write com.apple.finder ShowPathbar -bool true;ok
+running "Show path bar"
+defaults write com.apple.finder ShowPathbar -bool true;ok
 
 running "Allow text selection in Quick Look"
 defaults write com.apple.finder QLEnableTextSelection -bool true;ok
@@ -760,12 +842,6 @@ running "Don’t group windows by application in Mission Control"
 # (i.e. use the old Exposé behavior instead)
 defaults write com.apple.dock expose-group-by-app -bool false;ok
 
-running "Disable Dashboard"
-defaults write com.apple.dashboard mcx-disabled -bool true;ok
-
-running "Don’t show Dashboard as a Space"
-defaults write com.apple.dock dashboard-in-overlay -bool true;ok
-
 running "Don’t automatically rearrange Spaces based on most recent use"
 defaults write com.apple.dock mru-spaces -bool false;ok
 
@@ -785,6 +861,17 @@ defaults write com.apple.dock showhidden -bool true;ok
 
 running "Reset Launchpad, but keep the desktop wallpaper intact"
 find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete;ok
+
+# You can change the layout of your Launchpad
+# Use the following command in Terminal to change the layout of Launchpad.
+# Change ‘X’ into the number of icons to be showed in a single row (e.g 9).
+#defaults write com.apple.dock springboard-columns -int 9
+
+# Change ‘X’ to the number of rows (e.g 3).
+#defaults write com.apple.dock springboard-rows -int 3
+
+# Force a restart of Launchpad with the following command to apply the changes:
+#defaults write com.apple.dock ResetLaunchPad -bool TRUE;killall Dock
 
 ###############################################################################
 bot "Configuring Safari & WebKit"
@@ -854,12 +941,16 @@ defaults write com.apple.mail SpellCheckingBehavior -string "NoSpellCheckingEnab
 bot "Spotlight"
 ###############################################################################
 
-# running "Hide Spotlight tray-icon (and subsequent helper)"
-# sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search;ok
+running "Hide Spotlight tray-icon (and subsequent helper)"
+sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search;ok
 
-running "Disable Spotlight indexing for any volume that gets mounted and has not yet been indexed"
+# Issue on macOS Mojave :
+# Rich Trouton covers the move of /Volumes to no longer being world writable as of Sierra (10.12)
+# https://derflounder.wordpress.com/2016/09/21/macos-sierras-volumes-folder-is-no-longer-world-writable
+# running "Disable Spotlight indexing for any volume that gets mounted and has not yet been indexed"
 # Use `sudo mdutil -i off "/Volumes/foo"` to stop indexing any volume.
-sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes";ok
+# sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes";ok
+
 running "Change indexing order and disable some file types from being indexed"
 defaults write com.apple.spotlight orderedItems -array \
   '{"enabled" = 1;"name" = "APPLICATIONS";}' \
@@ -913,8 +1004,9 @@ bot "Terminal & iTerm2"
 #defaults write org.x.X11 wm_ffm -bool true;ok
 
 running "Installing iTerm2 preferences file from ~/.dotfiles/configs folder"
-defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
-defaults write com.googlecode.iterm2 PrefsCustomFolder -string "~/.dotfiles/configs"
+defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true;ok
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string "~/.dotfiles/configs";ok
+running "reading iterm settings"
 defaults read -app iTerm > /dev/null 2>&1;ok
 
 ###############################################################################
@@ -923,6 +1015,9 @@ bot "Time Machine"
 
 running "Prevent Time Machine from prompting to use new hard drives as backup volume"
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true;ok
+
+# running "Disable local Time Machine backups"
+# hash tmutil &> /dev/null && sudo tmutil disablelocal;ok
 
 ###############################################################################
 bot "Activity Monitor"
@@ -934,12 +1029,58 @@ defaults write com.apple.ActivityMonitor OpenMainWindow -bool true;ok
 running "Visualize CPU usage in the Activity Monitor Dock icon"
 defaults write com.apple.ActivityMonitor IconType -int 5;ok
 
+# Show processes in Activity Monitor
+# 100: All Processes
+# 101: All Processes, Hierarchally
+# 102: My Processes
+# 103: System Processes
+# 104: Other User Processes
+# 105: Active Processes
+# 106: Inactive Processes
+# 106: Inactive Processes
+# 107: Windowed Processes
 running "Show all processes in Activity Monitor"
-defaults write com.apple.ActivityMonitor ShowCategory -int 0;ok
+defaults write com.apple.ActivityMonitor ShowCategory -int 100;ok
 
 running "Sort Activity Monitor results by CPU usage"
 defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0;ok
+
+running "Set columns for each tab"
+defaults write com.apple.ActivityMonitor "UserColumnsPerTab v5.0" -dict \
+    '0' '( Command, CPUUsage, CPUTime, Threads, PID, UID, Ports )' \
+    '1' '( Command, ResidentSize, Threads, Ports, PID, UID,  )' \
+    '2' '( Command, PowerScore, 12HRPower, AppSleep, UID, powerAssertion )' \
+    '3' '( Command, bytesWritten, bytesRead, Architecture, PID, UID, CPUUsage )' \
+    '4' '( Command, txBytes, rxBytes, PID, UID, txPackets, rxPackets, CPUUsage )';ok
+
+running "Sort columns in each tab"
+defaults write com.apple.ActivityMonitor UserColumnSortPerTab -dict \
+    '0' '{ direction = 0; sort = CPUUsage; }' \
+    '1' '{ direction = 0; sort = ResidentSize; }' \
+    '2' '{ direction = 0; sort = 12HRPower; }' \
+    '3' '{ direction = 0; sort = bytesWritten; }' \
+    '4' '{ direction = 0; sort = txBytes; }';ok
+
+running "Update refresh frequency (in seconds)"
+# 1: Very often (1 sec)
+# 2: Often (2 sec)
+# 5: Normally (5 sec)
+defaults write com.apple.ActivityMonitor UpdatePeriod -int 2;ok
+
+running "Show Data in the Disk graph (instead of IO)"
+defaults write com.apple.ActivityMonitor DiskGraphType -int 1;ok
+
+running "Show Data in the Network graph (instead of packets)"
+defaults write com.apple.ActivityMonitor NetworkGraphType -int 1;ok
+
+running "Change Dock Icon"
+# 0: Application Icon
+# 2: Network Usage
+# 3: Disk Activity
+# 5: CPU Usage
+# 6: CPU History
+defaults write com.apple.ActivityMonitor IconType -int 3;ok
 
 ###############################################################################
 bot "Address Book, Dashboard, iCal, TextEdit, and Disk Utility"
@@ -953,6 +1094,7 @@ defaults write com.apple.dashboard devmode -bool true;ok
 
 running "Use plain text mode for new TextEdit documents"
 defaults write com.apple.TextEdit RichText -int 0;ok
+
 running "Open and save files as UTF-8 in TextEdit"
 defaults write com.apple.TextEdit PlainTextEncoding -int 4
 defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4;ok
@@ -970,13 +1112,6 @@ defaults write com.apple.appstore WebKitDeveloperExtras -bool true;ok
 
 running "Enable Debug Menu in the Mac App Store"
 defaults write com.apple.appstore ShowDebugMenu -bool true;ok
-
-###############################################################################
-bot "Photos"
-###############################################################################
-
-running "Prevent Photos from opening automatically when devices are plugged in"
-defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true;ok
 
 ###############################################################################
 bot "Messages"
@@ -1005,16 +1140,16 @@ defaults write org.n8gray.QLColorCode extraHLFlags '-l -W';ok
 ###############################################################################
 # Kill affected applications                                                  #
 ###############################################################################
-
-bot "OK. Note that some of these changes require a logout/restart to take effect."
-running "Killing affected applications (so they can reboot)...."
+bot "OK. Note that some of these changes require a logout/restart to take effect. Killing affected applications (so they can reboot)...."
 for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
   "Dock" "Finder" "Mail" "Messages" "Safari" "SystemUIServer" \
   "iCal" "iTerm2"; do
   killall "${app}" > /dev/null 2>&1
-done;ok
+done
 
 running "Restarting Quick Look..."
 qlmanage -r > /dev/null 2>&1;ok
 
-bot "Woot! All done. You can now close this terminal."
+brew update && brew upgrade && brew cleanup
+
+bot "Woot! All done"
