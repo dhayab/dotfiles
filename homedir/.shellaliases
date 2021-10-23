@@ -50,3 +50,5 @@ alias kube="kubectl"
 }
 
 alias typora="open -a typora"
+
+alias x86="arch -x86_64"

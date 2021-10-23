@@ -182,6 +182,19 @@ if ! xcode-select --print-path &> /dev/null; then
 fi
 
 # ###########################################################
+# Install Rosetta 2
+# ###########################################################
+bot "Rosetta 2"
+read -r -p "install rosetta 2 compatibility layer? [y|N] " response
+if [[ $response =~ (y|yes|Y) ]]; then
+  action "installing rosetta 2..."
+  softwareupdate --install-rosetta --agree-to-license
+  ok
+else
+  ok "skipping rosetta 2 installation"
+fi
+
+# ###########################################################
 # Install Homebrew (CLI Packages)
 # ###########################################################
 
@@ -225,11 +238,9 @@ RUBY_CONFIGURE_OPTS="--with-openssl-dir=`brew --prefix openssl` --with-readline-
 require_brew ruby
 # set zsh as the user login shell
 CURRENTSHELL=$(dscl . -read /Users/$USER UserShell | awk '{print $2}')
-if [[ "$CURRENTSHELL" != "/usr/local/bin/zsh" ]]; then
-  bot "setting newer homebrew zsh (/usr/local/bin/zsh) as your shell (password required)"
-  # sudo bash -c 'echo "/usr/local/bin/zsh" >> /etc/shells'
-  # chsh -s /usr/local/bin/zsh
-  sudo dscl . -change /Users/$USER UserShell $SHELL /usr/local/bin/zsh > /dev/null 2>&1
+if [[ "$CURRENTSHELL" != "/opt/homebrew/bin/zsh" ]]; then
+  bot "setting newer homebrew zsh (/opt/homebrew/bin/zsh) as your shell (password required)"
+  sudo dscl . -change /Users/$USER UserShell $SHELL /opt/homebrew/bin/zsh > /dev/null 2>&1
   ok
 fi
 
@@ -652,8 +663,8 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1;ok
 
-running "Trackpad: enable three fingers drag"
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true;ok
+# running "Trackpad: enable three fingers drag"
+# defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true;ok
 
 running "Trackpad: disable two fingers double tap gesture"
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerDoubleTapGesture -bool false;ok

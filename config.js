@@ -45,7 +45,6 @@ module.exports = {
     'aerial',
     'appcleaner',
     'cleanshot',
-    'clipy',
     'coderunner',
     'docker',
     // 'fantastical', // using mas version instead
@@ -55,6 +54,7 @@ module.exports = {
     'istat-menus',
     'iterm2',
     'logitech-options',
+    'maccy',
     'meld',
     'monitorcontrol',
     'moom',

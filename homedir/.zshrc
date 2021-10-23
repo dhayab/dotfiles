@@ -53,14 +53,14 @@ plugins=(colorize compleat cp dirpersist docker git httpie kubectl npm)
 
 source $ZSH/oh-my-zsh.sh
 
-source /usr/local/opt/nvm/nvm.sh
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 
 autoload -U add-zsh-hook
 load-nvmrc() {
   if [[ -f .nvmrc && -r .nvmrc ]]; then
-    nvm use &> /dev/null
-  else
-    nvm use stable
+    nvm use
+  elif [[ $(nvm version) != $(nvm version default)  ]]; then
+    nvm use default
   fi
 }
 add-zsh-hook chpwd load-nvmrc

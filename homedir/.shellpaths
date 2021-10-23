@@ -3,17 +3,11 @@ export PATH=$PATH:.
 #export PATH=$PATH:~/.dotfiles/scripts
 
 # Brew
-export PATH=/usr/local/sbin:$PATH
-export PATH=/usr/local/bin:$PATH
+export PATH=/opt/homebrew/sbin:$PATH
+export PATH=/opt/homebrew/bin:$PATH
 
 # GNU: sed + grep
 export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$PATH
 
 # GO
 #export PATH=$PATH:/usr/local/opt/go/libexec/bin
-
-# The next line updates PATH for the Google Cloud SDK.
-#source "/Users/$(whoami)/Downloads/google-cloud-sdk/path.zsh.inc"
-
-# The next line enables shell command completion for gcloud.
-#source "/Users/$(whoami)/Downloads/google-cloud-sdk/completion.zsh.inc"
