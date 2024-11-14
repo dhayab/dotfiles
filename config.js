@@ -1,89 +1,89 @@
 module.exports = {
   brew: [
-    // terminal bandwidth monitoring
-    'bandwhich',
-    // alternative to `cat`: https://github.com/sharkdp/bat
+    'algolia/algolia-cli/algolia',
+    // 'algolia/private/fig',
+    'awscli',
     'bat',
     // Install GNU core utilities (those that come with macOS are outdated)
     // Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
     'coreutils',
     'diff-so-fancy',
+    'ffmpeg',
     // Install GNU `find`, `locate`, `updatedb`, and `xargs`, `g`-prefixed
     'findutils',
-    'readline', // ensure gawk gets good readline
     'gawk',
+    'gh',
     'git-delta',
+    'git-lfs',
     'gnupg',
     // Install GNU `sed`, overwriting the built-in `sed`
     // so we can do "sed -i 's/foo/bar/' file" instead of "sed -i '' 's/foo/bar/' file"
     'gnu-sed --with-default-names',
     // upgrade grep so we can get things like inverted match (-v)
     'grep --with-default-names',
-    // better, more recent grep
-    'homebrew/dupes/grep',
-    // https://github.com/jkbrzt/httpie
     'httpie',
-    // jq is a sort of JSON grep
+    'jandedobbeleer/oh-my-posh/oh-my-posh',
     'jq',
-    'k9s',
-    'kubernetes-cli',
-    // Mac App Store CLI: https://github.com/mas-cli/mas
+    'keidarcy/tap/e1s',
+    // 'k9s',
+    // 'kubernetes-cli',
     'mas',
-    // better/more recent version of screen
-    'homebrew/dupes/screen',
+    'mise',
     'tldr',
     'tmux',
     'tree',
-    'ttyrec',
     // better, more recent vim
     'vim --with-client-server --with-override-system-vi',
     // Install wget with IRI support
     'wget --enable-iri',
   ],
   cask: [
-    // '1password', // using mas version instead
-    'aerial',
-    'appcleaner',
+    // '1password', // using direct download instead
+    '1password-cli',
+    // 'android-studio',
+    'betterzip',
+    'caffeine',
     'cleanshot',
-    'coderunner',
+    'db-browser-for-sqlite',
+    // 'discord',
     'docker',
-    // 'fantastical', // using mas version instead
-    'finicky',
+    'fantastical',
+    'font-fira-code-nerd-font',
+    'font-hack',
+    'font-hack-nerd-font',
+    'font-meslo-lg-nerd-font',
+    'font-source-code-pro',
+    'glance-chamburr',
     'iina',
     'insomnia',
-    'istat-menus',
     'iterm2',
+    'jordanbaird-ice',
     'logitech-options',
     'maccy',
     'meld',
     'monitorcontrol',
     'moom',
     'plexamp',
-    'slack',
+    'postico',
+    'raycast',
+    // 'slack',
+    'stay',
+    'telegram',
+    // 'temurin@11',
     'the-unarchiver',
     'typora',
+    // 'utm',
     'viscosity',
     'visual-studio-code',
     'xquartz',
-    // Quick Look plugins: https://github.com/sindresorhus/quick-look-plugins
-    'betterzip', // only used for its plugin
-    'qlcolorcode',
-    'qlimagesize',
-    'qlmarkdown',
-    'qlstephen',
-    'quicklook-json',
-    'suspicious-package',
   ],
   gem: [],
   mas: [
-    // 1Password
-    '1333542190',
-    // Deliveries.app
-    '290986013',
-    // Fantastical
-    '975937182',
-    // SimplyJSON
-    '1495193038',
+    '1594183810', // Shortery
+    '1606897889', // Consent-o-matic
+    '1498224474', // Forematter
+    '1463298887', // Userscripts
+    '967004861', // HP Easy Scan
   ],
   npm: [],
 };
