@@ -16,10 +16,8 @@ bindkey -v
 # Tool settings
 #########################################################################
 export FONTCONFIG_PATH=/opt/X11/lib/X11/fontconfig
-export NVM_DIR=~/.nvm
 
 # Don't clear the screen after quitting a manual page.
 export MANPAGER='less -X'
 
-# Use Vivaldi binary for karma
-export CHROME_BIN=/Applications/Vivaldi.app/Contents/MacOS/Vivaldi
+export VAULT_ADDR=""

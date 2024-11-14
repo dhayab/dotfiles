@@ -11,8 +11,13 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}"
 export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:"
 export INFOPATH="/opt/homebrew/share/info${INFOPATH:-}"
 
+# Flutter
+export FLUTTER_ROOT="$(mise where flutter)"
+
 # GNU: sed + grep
 export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/opt/grep/libexec/gnubin:$PATH
 
-# GO
-#export PATH=$PATH:/usr/local/opt/go/libexec/bin
+# GO (handled through mise)
+
+# Local binaries
+export PATH="$HOME/.local/bin:$PATH"

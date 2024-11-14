@@ -152,9 +152,10 @@
   smudge = git media smudge %f
 
 [filter "lfs"]
-  clean = git-lfs clean %f
-  smudge = git-lfs smudge %f
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
   required = true
+  process = git-lfs filter-process
 
 [url "https://github.com/"]
   insteadOf = github:
@@ -163,3 +164,12 @@
 [url "git@github.com:"]
   pushInsteadOf = github:
   pushInsteadOf = gh:
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+  gpgsign = true

@@ -3,37 +3,21 @@ export ZSH=$HOME/.dotfiles/oh-my-zsh
 
 export DEFAULT_USER=LOGNAME
 
-export ZSH_THEME="powerlevel9k/powerlevel9k"
-POWERLEVEL9K_MODE='nerdfont-complete'
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(status context dir nvm vcs)
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(command_execution_time root_indicator)
-POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
-# POWERLEVEL9K_PROMPT_ON_NEWLINE=true
-# POWERLEVEL9K_MULTILINE_FIRST_PROMPT_PREFIX=""
-# POWERLEVEL9K_MULTILINE_LAST_PROMPT_PREFIX="\uf155 "
-POWERLEVEL9K_STATUS_OK=false
-POWERLEVEL9K_HOME_SUB_ICON=''
-POWERLEVEL9K_DIR_DEFAULT_FOREGROUND=white
-POWERLEVEL9K_DIR_DEFAULT_BACKGROUND=steelblue
-POWERLEVEL9K_DIR_ETC_FOREGROUND=white
-POWERLEVEL9K_DIR_ETC_BACKGROUND=steelblue
-POWERLEVEL9K_DIR_HOME_FOREGROUND=white
-POWERLEVEL9K_DIR_HOME_BACKGROUND=steelblue
-POWERLEVEL9K_DIR_HOME_SUBFOLDER_FOREGROUND=white
-POWERLEVEL9K_DIR_HOME_SUBFOLDER_BACKGROUND=steelblue
-POWERLEVEL9K_DIR_PATH_HIGHLIGHT_BOLD=true
-POWERLEVEL9K_SHORTEN_DIR_LENGTH=2
-POWERLEVEL9K_NVM_FOREGROUND=black
-POWERLEVEL9K_NVM_BACKGROUND=green
-POWERLEVEL9K_VCS_CLEAN_FOREGROUND=green
-POWERLEVEL9K_VCS_CLEAN_BACKGROUND=black
-POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=yellow
-POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=black
-POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=magenta
-POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=black
-POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=0
-POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=black
-POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=yellow
+# Force locale to be set in English
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(status context dir nvm vcs)
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(command_execution_time root_indicator)
+
+# POWERLEVEL9K_NVM_FOREGROUND=black
+# POWERLEVEL9K_NVM_BACKGROUND=green
+
+# POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=magenta
+# POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=black
+# POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=0
+# POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=black
+# POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=yellow
 
 # Set to this to use case-sensitive completion
 # export CASE_SENSITIVE="true"
@@ -47,24 +31,15 @@ POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=yellow
 # disable autosetting terminal title.
 export DISABLE_AUTO_TITLE="true"
 
+# Enable oh my posh prompt engine
+eval "$(oh-my-posh init zsh --config $HOME/.dotfiles/configs/multiverse-neon.omp.json)"
+
 # Which plugins would you like to load? (plugins can be found in ~/.dotfiles/oh-my-zsh/plugins/*)
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(colorize compleat cp dirpersist docker git httpie kubectl npm)
+plugins=(aws colorize compleat cp dirpersist docker git httpie npm yarn)
 
 source $ZSH/oh-my-zsh.sh
-
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-
 autoload -U add-zsh-hook
-load-nvmrc() {
-  if [[ -f .nvmrc && -r .nvmrc ]]; then
-    nvm use
-  elif [[ $(nvm version) != $(nvm version default)  ]]; then
-    nvm use default
-  fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
 
 # Customize to your needs...
 unsetopt correct
@@ -73,3 +48,15 @@ function short_title {
     title $(basename `pwd`)
 }
 precmd_functions+=short_title
+
+autoload -U compinit; compinit
+source <(algolia completion zsh); compdef _algolia algolia
+[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+
+eval "$(mise activate zsh)"
+
+# 1P CLI Plugins
+source $HOME/.config/op/plugins.sh
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/vault vault
